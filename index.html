@@ -87,7 +87,17 @@ button {
   async function loadMemo() {
     const docSnap = await getDoc(doc(db, "memos", ganji));
     if (docSnap.exists()) {
-      memoList.innerHTML = `<div class="memo">${docSnap.data().text}</div>`;
+      const data = docSnap.data();
+      memoList.innerHTML = `
+        <div class="memo">
+          <div style="font-size:12px; color:#aaa;">
+            ${data.date}
+          </div>
+          <div>
+            ${data.text}
+          </div>
+        </div>
+      `;
     } else {
       memoList.innerHTML = "";
     }
@@ -102,6 +112,7 @@ button {
 
     await setDoc(doc(db, "memos", ganji), {
       text: memo
+      date: today.toLocaleDateString()
     });
 
     document.getElementById("memoInput").value = "";
