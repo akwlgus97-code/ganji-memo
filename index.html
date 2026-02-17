@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ganji Memo</title>
+<style>
+body {
+  background-color: #111;
+  color: white;
+  font-family: sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+h1 {
+  font-size: 28px;
+}
+input {
+  width: 80%;
+  padding: 10px;
+  margin-top: 10px;
+}
+button {
+  padding: 10px 20px;
+  margin-top: 10px;
+}
+.memo {
+  margin-top: 10px;
+  border-bottom: 1px solid #333;
+  padding: 5px;
+}
+</style>
+</head>
+<body>
+
+<h1 id="today"></h1>
+<h2 id="ganji"></h2>
+
+<div id="memoList"></div>
+
+<input type="text" id="memoInput" placeholder="오늘 한 줄 기록">
+<br>
+<button onclick="saveMemo()">저장</button>
+
+<script>
+const ganjiList = [
+"갑자","을축","병인","정묘","무진","기사","경오","신미","임신","계유",
+"갑술","을해","병자","정축","무인","기묘","경진","신사","임오","계미",
+"갑신","을유","병술","정해","무자","기축","경인","신묘","임진","계사",
+"갑오","을미","병신","정유","무술","기해","경자","신축","임인","계묘",
+"갑진","을사","병오","정미","무신","기유","경술","신해","임자","계축",
+"갑인","을묘","병진","정사","무오","기미","경신","신유","임술","계해"
+];
+
+const today = new Date();
+const reference = new Date("2024-01-01");
+const diffTime = today - reference;
+const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+const index = ((diffDays % 60) + 60) % 60;
+const todayGanji = ganjiList[index];
+
+document.getElementById("today").innerText =
+today.getFullYear() + "." +
+(today.getMonth()+1) + "." +
+today.getDate();
+
+document.getElementById("ganji").innerText =
+"오늘은 " + todayGanji + "일";
+
+function loadMemos() {
+  const data = JSON.parse(localStorage.getItem(todayGanji)) || [];
+  const list = document.getElementById("memoList");
+  list.innerHTML = "";
+  data.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "memo";
+    div.innerText = item.date + " - " + item.text;
+    list.appendChild(div);
+  });
+}
+
+function saveMemo() {
+  const input = document.getElementById("memoInput");
+  if (!input.value) return alert("메모를 입력하세요");
+  const data = JSON.parse(localStorage.getItem(todayGanji)) || [];
+  data.push({
+    date: today.toISOString().split("T")[0],
+    text: input.value
+  });
+  localStorage.setItem(todayGanji, JSON.stringify(data));
+  input.value = "";
+  loadMemos();
+}
+
+loadMemos();
+</script>
+
+</body>
+</html>
