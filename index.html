@@ -42,79 +42,41 @@ button {
 <br>
 <button onclick="saveMemo()">저장</button>
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyBL3GTmoVaf2xdIuEvwo93Af_7RfHUwKjM",
-  authDomain: "ganji-memo.firebaseapp.com",
-  projectId: "ganji-memo",
-  storageBucket: "ganji-memo.firebasestorage.app",
-  messagingSenderId: "420111858815",
-  appId: "1:420111858815:web:ac22f6af5e8e8dc4ee934a"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyBL3GTmoVaf2xdIuEvwo93Af_7RfHUwKjM",
+    authDomain: "ganji-memo.firebaseapp.com",
+    projectId: "ganji-memo",
+    storageBucket: "ganji-memo.firebasestorage.app",
+    messagingSenderId: "420111858815",
+    appId: "1:420111858815:web:ac22f6af5e8e8dc4ee934a",
+  };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-await signInWithPopup(auth, provider);
+  window.saveMemoToCloud = async function(day, memo) {
+    await setDoc(doc(db, "memos", day), {
+      text: memo
+    });
+  };
 
-const ganjiList = [
-"갑자","을축","병인","정묘","무진","기사","경오","신미","임신","계유",
-"갑술","을해","병자","정축","무인","기묘","경진","신사","임오","계미",
-"갑신","을유","병술","정해","무자","기축","경인","신묘","임진","계사",
-"갑오","을미","병신","정유","무술","기해","경자","신축","임인","계묘",
-"갑진","을사","병오","정미","무신","기유","경술","신해","임자","계축",
-"갑인","을묘","병진","정사","무오","기미","경신","신유","임술","계해"
-];
-
-const today = new Date();
-const reference = new Date("2024-01-01");
-const diffTime = today - reference;
-const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-const index = ((diffDays % 60) + 60) % 60;
-const todayGanji = ganjiList[index];
-
-document.getElementById("today").innerText =
-today.getFullYear() + "." +
-(today.getMonth()+1) + "." +
-today.getDate();
-
-document.getElementById("ganji").innerText =
-"오늘은 " + todayGanji + "일";
-
-async function loadMemos() {
-  const q = query(collection(db, "memos"), where("ganji", "==", todayGanji));
-  const querySnapshot = await getDocs(q);
-  const list = document.getElementById("memoList");
-  list.innerHTML = "";
-  querySnapshot.forEach((doc) => {
-    const data = doc.data();
-    const div = document.createElement("div");
-    div.className = "memo";
-    div.innerText = data.date + " - " + data.text;
-    list.appendChild(div);
-  });
-}
-
-window.saveMemo = async function() {
-  const input = document.getElementById("memoInput");
-  if (!input.value) return alert("메모를 입력하세요");
-  await addDoc(collection(db, "memos"), {
-    ganji: todayGanji,
-    date: today.toISOString().split("T")[0],
-    text: input.value
-  });
-  input.value = "";
-  loadMemos();
-};
-
-loadMemos();
+  window.getMemoFromCloud = async function(day) {
+    const docSnap = await getDoc(doc(db, "memos", day));
+    if (docSnap.exists()) {
+      return docSnap.data().text;
+    }
+    return "";
+  };
 </script>
+
 
 
 </body>
