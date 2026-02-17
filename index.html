@@ -112,7 +112,7 @@ button {
 
     await setDoc(doc(db, "memos", ganji), {
       text: memo,
-      date: today.toLocaleDateString()
+      date: new Date().toLocaleDateString()
     });
 
     document.getElementById("memoInput").value = "";
