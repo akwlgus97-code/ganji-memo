@@ -56,28 +56,60 @@ button {
     projectId: "ganji-memo",
     storageBucket: "ganji-memo.firebasestorage.app",
     messagingSenderId: "420111858815",
-    appId: "1:420111858815:web:ac22f6af5e8e8dc4ee934a",
+    appId: "1:420111858815:web:ac22f6af5e8e8dc4ee934a"
   };
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  window.saveMemoToCloud = async function(day, memo) {
-    await setDoc(doc(db, "memos", day), {
+  // 🔥 60갑자 배열
+  const ganjiList = [
+    "갑자","을축","병인","정묘","무진","기사","경오","신미","임신","계유",
+    "갑술","을해","병자","정축","무인","기묘","경진","신사","임오","계미",
+    "갑신","을유","병술","정해","무자","기축","경인","신묘","임진","계사",
+    "갑오","을미","병신","정유","무술","기해","경자","신축","임인","계묘",
+    "갑진","을사","병오","정미","무신","기유","경술","신해","임자","계축",
+    "갑인","을묘","병진","정사","무오","기미","경신","신유","임술","계해"
+  ];
+
+  // 오늘 날짜
+  const today = new Date();
+  document.getElementById("today").innerText = today.toLocaleDateString();
+
+  // 기준일 (2024-01-01 = 갑자일로 가정)
+  const baseDate = new Date("2024-01-01");
+  const diffDays = Math.floor((today - baseDate) / (1000 * 60 * 60 * 24));
+  const ganji = ganjiList[(diffDays % 60 + 60) % 60];
+
+  document.getElementById("ganji").innerText = ganji + "일";
+
+  const memoList = document.getElementById("memoList");
+
+  // 🔥 메모 불러오기
+  async function loadMemo() {
+    const docSnap = await getDoc(doc(db, "memos", ganji));
+    if (docSnap.exists()) {
+      memoList.innerHTML = `<div class="memo">${docSnap.data().text}</div>`;
+    } else {
+      memoList.innerHTML = "";
+    }
+  }
+
+  loadMemo();
+
+  // 🔥 메모 저장
+  window.saveMemo = async function() {
+    const memo = document.getElementById("memoInput").value;
+    if (!memo) return;
+
+    await setDoc(doc(db, "memos", ganji), {
       text: memo
     });
-  };
 
-  window.getMemoFromCloud = async function(day) {
-    const docSnap = await getDoc(doc(db, "memos", day));
-    if (docSnap.exists()) {
-      return docSnap.data().text;
-    }
-    return "";
+    document.getElementById("memoInput").value = "";
+    loadMemo();
   };
 </script>
-
-
 
 </body>
 </html>
