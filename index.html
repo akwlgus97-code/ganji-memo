@@ -111,7 +111,7 @@ button {
     if (!memo) return;
 
     await setDoc(doc(db, "memos", ganji), {
-      text: memo
+      text: memo,
       date: today.toLocaleDateString()
     });
 
